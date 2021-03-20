@@ -1,0 +1,188 @@
+
+<html>
+<head>
+<meta charset = "UTF-8">
+<title>brick breaker</title>
+<canvas id = "brick breaker" width = "600" height = "500"></canvas>
+<style> 
+   body {
+      margin-left : 7cm;
+   }
+   canvas { background: "blue"; }
+</style>
+</head>
+<body>
+   <script>
+    
+    var canv = document.getElementById("brick breaker");
+    var ctx = canv.getContext("2d");
+	
+	const ballwidth = 20 ; 
+	const ballHeight = 20 ;
+	const playerwidth = 60 ;
+	const playerheight = 20 ; 
+	const playery = (canv.height - 20) -  playerheight;
+	
+	var playerx = (canv.width / 2 ) - playerwidth / 2 ;
+	var ballxx = 4 ; 
+	var ballyy = -4 ;
+	var bally = (canv.height/2 ) + ballHeight/2;
+    var ballx = (canv.width/2 ) + ballwidth/2;
+	var brickRowCount = 3;
+	var brickColumnCount = 6;
+	var brickWidth = 75;
+	var brickHeight = 20;
+	var brickPadding = 10;
+	var brickOffsetTop = 30;
+	var brickOffsetLeft = 50;
+	
+	var score = 0 ;
+	
+	var rightPressed = false ; 
+	var leftPressed = false ; 
+	  
+	document.addEventListener("keydown",keydown,false);
+	document.addEventListener("keyup",keyup,false);
+	document.addEventListener("mousemove", mouseMoveHandler, false);
+	
+	function keydown(e) {
+		if(e.key == "Right" || e.key == "ArrowRight") {
+			rightPressed = true;
+		}
+		else if(e.key == "Left" || e.key == "ArrowLeft") {
+			leftPressed = true;
+		}
+	}
+
+	function keyup(e) {
+		if(e.key == "Right" || e.key == "ArrowRight") {
+			rightPressed = false;
+		}
+		else if(e.key == "Left" || e.key == "ArrowLeft") {
+			leftPressed = false;
+		}
+	}
+	function mouseMoveHandler(e) {
+    var relativeX = e.clientX - canv.offsetLeft;
+    if(relativeX > 0 && relativeX < canv.width) {
+        playerx = relativeX - playerwidth/2;
+    }
+}
+		
+	game = setInterval(loop, 10);
+	
+  var bricks = [];
+	for(var c=0; c<brickColumnCount; c++) {
+		bricks[c] = [];
+		for(var r=0; r<brickRowCount; r++) {
+			bricks[c][r] = { x: 0, y: 0 ,status : 1};
+		}
+	}
+	function loop(){
+		ctx.fillStyle = "black";
+		ctx.fillRect(0,0,canv.width,canv.height);
+		  drawball();
+		  moveball();	
+		  drawplayer();
+		  moveplayer();
+		  bounceandEnd();
+		  drawBricks();
+		  collisionDetection();
+	}
+	function drawBricks() {
+    for(var c=0; c<brickColumnCount; c++) {
+        for(var r=0; r<brickRowCount; r++) {
+		if (bricks[c][r].status == 1 ){
+            var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
+            var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
+            bricks[c][r].x = brickX;
+            bricks[c][r].y = brickY;
+            ctx.beginPath();
+            ctx.rect(brickX, brickY, brickWidth, brickHeight);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+			}
+        }
+    }
+}
+function drawScore() {
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#0095DD";
+    ctx.fillText("Score: "+score, 8, 20);
+}
+function collisionDetection() {
+    for(var c=0; c<brickColumnCount; c++) {
+        for(var r=0; r<brickRowCount; r++) {
+            var b = bricks[c][r];
+            if(b.status == 1) {
+                if(ballx > b.x && ballx < b.x+brickWidth && bally > b.y && bally < b.y+brickHeight) {
+				    bally = b.y+brickHeight
+                    ballyy = -ballyy;
+                    b.status = 0;
+					score++ ;
+					 if(score == brickRowCount*brickColumnCount) {
+                        alert("YOU WIN, CONGRATULATIONS!");
+                        document.location.reload();
+                        clearInterval(interval); // Needed for Chrome to end game
+                    }
+                }
+            }
+        }
+    }
+}
+	function bounceandEnd(){
+	 if(bally + ballyy < 0) {
+		ballyy = -ballyy;
+	 } else if(bally + ballyy > canv.height-60) {
+		if(ballx > playerx && ballx < playerx + playerwidth) {
+		    bally  = canv.height-60-4;
+			ballyy = -ballyy;
+		}
+		else {
+		  if (bally > canv.height){
+			alert("GAME OVER");
+			document.location.reload();
+			clearInterval(game);
+			}
+		}
+	}
+}
+	function drawplayer(){
+	   ctx.fillStyle = "white";
+	   ctx.fillRect(playerx,playery,playerwidth,playerheight); 
+	}
+	function moveplayer(){
+    if(rightPressed) {
+        playerx += 7;
+        if (playerx + playerwidth > canv.width){
+            playerx = canv.width - playerwidth;
+        }
+    }
+    else if(leftPressed) {
+        playerx -= 7;
+        if (playerx < 0){
+            playerx = 0;
+        }
+    }
+	}
+	function drawball(){
+	ctx.fillStyle = "white" ; 
+	ctx.fillRect(ballx,bally,ballwidth,ballHeight)
+	}
+	function moveball(){
+	   bally += ballyy ;
+	   ballx += ballxx ;  
+	   if (ballx >= 580){
+	    ballxx *= -1 ;
+	   }
+	   if (ballx <= 0){
+	    ballxx *= -1 ;
+	   }
+	   if (bally <= 0){
+	    ballyy *= -1 ;
+	   }
+	}
+   </script>
+</body>
+</html>
